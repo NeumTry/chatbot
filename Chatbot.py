@@ -3,13 +3,24 @@ import streamlit as st
 import requests
 import json
 
-with st.sidebar:
-    st.header("Neum AI Chatbot")
-    st.markdown("Connect your data pipeline to a chatbot to validate the data stored.")
-    neumai_api_key = st.text_input("Neum AI API Key", key="neumai_api_key", type="password")
-    neumai_pipeline_id = st.text_input("Neum AI Pipeline ID", key="neumai_pipeline_id")
-    openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+query_params = st.experimental_get_query_params()
 
+if "neumai_api_key" not in st.session_state:
+    st.session_state["neumai_api_key"] = query_params.get("neumai_api_key", [""])[0]
+if "neumai_pipeline_id" not in st.session_state:
+    st.session_state["neumai_pipeline_id"] = query_params.get("neumai_pipeline_id", [""])[0]
+if "openai_api_key" not in st.session_state:
+    st.session_state["openai_api_key"] = ""
+
+with st.sidebar:
+    st.title("Neum AI Chatbot")
+    st.markdown("Neum AI helps you connect and synchronize your data to a vector database. Simply set up a pipeline and let Neum AI automatically synchronize your data.")
+    st.markdown("This app allows you to chat with the data connected to your pipeline")
+    st.markdown("To get started [create](https://dashboard.neum.ai/) a Neum AI account and [setup](https://docs.neum.ai/docs/build-in-the-ui) your data pipeline.")
+    neumai_api_key = st.text_input("Neum AI API Key", key="neumai_api_key", type="password", value=st.session_state["neumai_api_key"])
+    neumai_pipeline_id = st.text_input("Neum AI Pipeline ID", key="neumai_pipeline_id", value=st.session_state["neumai_pipeline_id"])
+    openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password", value=st.session_state["openai_api_key"])
+print(st.experimental_get_query_params())
 st.title("Chat with your pipeline")
 st.caption("Simple chatbot powered by Neum AI and OpenAI")
 if "messages" not in st.session_state:
