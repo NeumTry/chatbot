@@ -20,7 +20,7 @@ with st.sidebar:
     neumai_api_key = st.text_input("Neum AI API Key", key="neumai_api_key", type="password", value=st.session_state["neumai_api_key"])
     neumai_pipeline_id = st.text_input("Neum AI Pipeline ID", key="neumai_pipeline_id", value=st.session_state["neumai_pipeline_id"])
     openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password", value=st.session_state["openai_api_key"])
-print(st.experimental_get_query_params())
+
 st.title("Chat with your pipeline")
 st.caption("Simple chatbot powered by Neum AI and OpenAI")
 if "messages" not in st.session_state:
