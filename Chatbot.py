@@ -26,11 +26,15 @@ st.caption("Simple chatbot powered by Neum AI and OpenAI")
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
     st.session_state["messages"].append({"role": "system", "content": f"You are a helpful assistant that answers questions based on the following context:"})
-    st.session_state["messages"].append({"role": "assistant", "content": "How can I help you?"})
+    st.session_state["messages"].append({"role": "assistant", "content": "How can I help you?", "context":""})
 
 for msg in st.session_state.messages:
     if(msg["role"] != "system"):
-        st.chat_message(msg["role"]).write(msg["content"])
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
+            if msg["role"] == "assistant" and msg["context"] != "":
+                with st.expander("Context"):
+                    st.text(msg["context"])
 
 if prompt := st.chat_input():
     if not openai_api_key or not neumai_api_key or not neumai_pipeline_id:
@@ -72,7 +76,11 @@ if prompt := st.chat_input():
     openai.api_key = openai_api_key
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
-    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=st.session_state.messages)
+    messages = [{k: v for k, v in item.items() if k != 'context'} for item in st.session_state.messages]
+    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
     msg = response.choices[0].message
-    st.session_state.messages.append(msg)
-    st.chat_message("assistant").write(msg.content)
+    st.session_state.messages.append({"role":"assistant", "content":msg["content"], "context":context})
+    with st.chat_message("assistant"):
+        st.write(msg.content)
+        with st.expander("Context"):
+            st.text(context)
