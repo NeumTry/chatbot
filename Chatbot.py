@@ -20,6 +20,7 @@ with st.sidebar:
     neumai_api_key = st.text_input("Neum AI API Key", key="neumai_api_key", type="password", value=st.session_state["neumai_api_key"])
     neumai_pipeline_id = st.text_input("Neum AI Pipeline ID", key="neumai_pipeline_id", value=st.session_state["neumai_pipeline_id"])
     openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password", value=st.session_state["openai_api_key"])
+    include_context = st.toggle("Include context in messages", True)
 
 st.title("Chat with your pipeline")
 st.caption("Simple chatbot powered by Neum AI and OpenAI")
@@ -32,7 +33,7 @@ for msg in st.session_state.messages:
     if(msg["role"] != "system"):
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
-            if msg["role"] == "assistant" and msg["context"] != "":
+            if msg["role"] == "assistant" and msg["context"] != "" and include_context:
                 with st.expander("Context"):
                     st.text(msg["context"])
 
@@ -82,5 +83,6 @@ if prompt := st.chat_input():
     st.session_state.messages.append({"role":"assistant", "content":msg["content"], "context":context})
     with st.chat_message("assistant"):
         st.write(msg.content)
-        with st.expander("Context"):
-            st.text(context)
+        if include_context:
+            with st.expander("Context"):
+                st.text(context)
