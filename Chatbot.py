@@ -55,8 +55,8 @@ if prompt := st.chat_input():
     # Replace these variables with your actual values
 
     # URL
-    url= f"http://127.0.0.1:8000/v1/pipelines/{neumai_pipeline_id}/search"
-    #url = f"https://api.neum.ai/v1/pipelines/{neumai_pipeline_id}/search"
+    # url= f"http://127.0.0.1:8000/v1/pipelines/{neumai_pipeline_id}/search"
+    url = f"https://api.neum.ai/v1/pipelines/{neumai_pipeline_id}/search"
 
     # Headers
     headers = {
