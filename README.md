@@ -8,7 +8,7 @@ Neum AI helps developers automatically connect and synchronize their data into v
 
 ## Demo App
 
-[Live App](https://neumai-chatbot.streamlit.app/)
+[Live App](https://neum-chatbot.streamlit.app/)
 
 To run the app you will need a Neum AI API Key, a live data pipeline on the platform and an OpenAI API Key.
 
