@@ -1,7 +1,8 @@
-import openai
+from openai import OpenAI
 import streamlit as st
 import requests
 import json
+from neumai.Client.NeumClient import NeumClient
 
 query_params = st.experimental_get_query_params()
 
@@ -25,7 +26,7 @@ with st.sidebar:
     neumai_pipeline_id = st.text_input("Neum AI Pipeline ID", key="neumai_pipeline_id", value=st.session_state["neumai_pipeline_id"])
     openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password", value=st.session_state["openai_api_key"])
     include_context = st.toggle("Include context in messages", True)
-    system_prompt = st.toggle("Change system prompt", True)
+    system_prompt = st.toggle("Change system prompt", False)
     if system_prompt:
         initial_value = st.session_state["system_prompt"]
         st.session_state["system_prompt"] = st.text_area(label="System Prompt", value=initial_value, height=200)
@@ -52,46 +53,27 @@ if prompt := st.chat_input():
 
     # Get context from Neum AI
 
-    # Replace these variables with your actual values
-
-    # URL
-    # url= f"http://127.0.0.1:8000/v1/pipelines/{neumai_pipeline_id}/search"
-    url = f"https://api.neum.ai/v1/pipelines/{neumai_pipeline_id}/search"
-
-    # Headers
-    headers = {
-        "neum-api-key": neumai_api_key,
-        "Content-Type": "application/json"
-    }
-
-    # Body
-    payload = {
-        "query": prompt,
-        "number_of_results": 5
-    }
-
-    # Make the POST request
-    response = requests.post(url, headers=headers, json=payload)
-    response.raise_for_status()
-
-    # Parse the JSON response
-    json_response = response.json()
-
+    neumClient = NeumClient(api_key=neumai_api_key)
+    json_response = neumClient.search_pipeline(pipeline_id=neumai_pipeline_id, query=prompt, num_of_results=5)
     # Extract the 'results' list from the JSON response
-    results = json_response.get('results', [])
+    # Additional metadata fields are available as well as id and score.
+    results = [ json.loads(result)['metadata']['text'] for result in json_response] 
     st.session_state["context"] = '\n\n'.join(results)
     st.session_state["messages"][0] = {"role": "system", "content": st.session_state["system_prompt"].format(st.session_state["context"])}
 
     # Request to Open AI
-    openai.api_key = openai_api_key
+    client = OpenAI(
+        api_key=openai_api_key
+    )
+
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
     messages = [{k: v for k, v in item.items() if k != 'context'} for item in st.session_state.messages]
-    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
-    msg = response.choices[0].message
-    st.session_state.messages.append({"role":"assistant", "content":msg["content"], "context":st.session_state["context"]})
+    response = client.chat.completions.create(model="gpt-3.5-turbo", messages=messages)
+    msg = response.choices[0].message.content
+    st.session_state.messages.append({"role":"assistant", "content":msg, "context":st.session_state["context"]})
     with st.chat_message("assistant"):
-        st.write(msg.content)
+        st.write(msg)
         if include_context:
             with st.expander("Context"):
                 st.text(st.session_state["context"])
