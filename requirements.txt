@@ -4,4 +4,4 @@ openai>=1.0.0
 trubrics>=1.4.3
 streamlit-feedback
 requests
-neumai>=0.0.30
+neumai>=0.0.35
